@@ -1,0 +1,15 @@
+inner join physionet-data.mimic_derived.sepsis3 as s3
+on s3.stay_id = ***.stay_id
+
+left join (select distinct stay_id from  physionet-data.mimic_derived.epinephrine
+union distinct
+select distinct stay_id from  physionet-data.mimic_derived.dobutamine
+union distinct
+select distinct stay_id from  physionet-data.mimic_derived.dopamine
+union distinct
+select distinct stay_id from  physionet-data.mimic_derived.norepinephrine
+union distinct
+select distinct stay_id from  physionet-data.mimic_derived.phenylephrine
+union distinct
+select distinct stay_id from  physionet-data.mimic_derived.vasopressin)as pressor
+on pressor.stay_id = ***.stay_id
