@@ -30,5 +30,5 @@
   
   /*
   cohort group (9071) = WHERE midodrine_include == 1
-  cohort group given midodrine (857) = WHERE drug_starttime is not NULL 
+  cohort group given midodrine (857) = cohort_group[WHERE drug_starttime is not NULL]
   */
