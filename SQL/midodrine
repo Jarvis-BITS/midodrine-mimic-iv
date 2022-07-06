@@ -1,0 +1,34 @@
+-- midodrine cohort
+  )
+  , midodrine AS (
+    SELECT hadm_id, starttime AS drug_starttime
+    FROM `physionet-data.mimic_hosp.pharmacy`
+    WHERE lower(medication) like 'midodrine'
+  )
+  , midodrine_include AS (
+    SELECT stay_id,
+    CASE WHEN LOGICAL_AND(drug_starttime is NULL)
+    OR LOGICAL_OR(drug_starttime BETWEEN DATE_TRUNC(intime - interval '1' day, DAY) AND outtime) THEN 1
+    ELSE 0 END AS midodrine_include
+    FROM `physionet-data.mimic_icu.icustays`  
+    LEFT JOIN midodrine USING (hadm_id)
+    GROUP BY stay_id
+  )
+  , midodrine_first AS (
+  SELECT stay_id, min(drug_starttime) AS drug_starttime 
+  FROM `physionet-data.mimic_icu.icustays` LEFT JOIN midodrine mi USING (hadm_id)
+  WHERE drug_starttime BETWEEN DATE_TRUNC(intime - interval '1' day, DAY) AND outtime
+  GROUP BY stay_id
+  )
+ , midodrine_dose AS (
+  SELECT ic.stay_id, AVG(doses_per_24_hrs) AS avg_doses_per_24_hrs
+  FROM `physionet-data.mimic_hosp.pharmacy` ph
+  INNER JOIN `physionet-data.mimic_icu.icustays`ic
+  ON ph.hadm_id = ic.hadm_id
+  GROUP BY ic.stay_id
+  )
+  
+  /*
+  cohort group (9071) = WHERE midodrine_include == 1
+  cohort group given midodrine (857) = WHERE drug_starttime is not NULL 
+  */
